@@ -27,3 +27,4 @@ hs_err_pid*
 /.gradle/
 /build/
 /test.csv
+/src/main/resources/
