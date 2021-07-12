@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class BestMatchingSequential {
-    List<Pair> wordsAndDistance = new ArrayList<>();
+public class BestMatching {
+    List<Word> wordsAndDistance = new ArrayList<>();
 
     public int levenshtein(int[][] matrix, String str1, String str2, int i, int j) {
         if (Math.min(i, j) == 0)
@@ -22,7 +22,7 @@ public class BestMatchingSequential {
         return matrix[i - 1][j - 1];
     }
 
-    public int similarityDistance(String str1, String str2) {
+    public int calculate(String str1, String str2) {
         int[][] matrix = new int[str1.length()][str2.length()];
 
         for (int i = 0; i < str1.length(); i++)
@@ -32,7 +32,7 @@ public class BestMatchingSequential {
         return levenshtein(matrix, str1, str2, str1.length(), str2.length());
     }
 
-    public ArrayList<String> readDataset(String path) {
+    public ArrayList<String> read(String path) {
         ArrayList<String> data = new ArrayList<>();
 
         try {
@@ -51,17 +51,17 @@ public class BestMatchingSequential {
         return data;
     }
 
-    public Pair calculate(String path, String word) {
-        ArrayList<String> data = readDataset(path);
+    public Word start(String path, String word) {
+        ArrayList<String> data = read(path);
 
         for (String str : data) {
-            wordsAndDistance.add(new Pair(similarityDistance(word, str), str));
+            wordsAndDistance.add(new Word(calculate(word, str), str));
         }
 
         wordsAndDistance.sort((p1, p2) -> {
-            if (p1.getFirst().equals(p2.getFirst()))
-                return p1.getSecond().compareTo(p2.getSecond());
-            return p1.getFirst() - p2.getFirst();
+            if (p1.getDistance().equals(p2.getDistance()))
+                return p1.getWord().compareTo(p2.getWord());
+            return p1.getDistance() - p2.getDistance();
         });
 
         write(word);
@@ -71,11 +71,11 @@ public class BestMatchingSequential {
 
     public void write(String word) {
         try {
-            FileWriter fw = new FileWriter("output/" + word + ".csv");
+            FileWriter fw = new FileWriter(word + ".csv");
             fw.write("Words;Similarity to \"" + word + "\"\n");
 
-            for (Pair p : wordsAndDistance) {
-                String str = p.getSecond() + ";" + p.getFirst().toString() + "\n";
+            for (Word p : wordsAndDistance) {
+                String str = p.getWord() + ";" + p.getDistance().toString() + "\n";
                 fw.write(str);
             }
 

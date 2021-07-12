@@ -4,17 +4,15 @@ public class Main {
     private static final String DICTIONARY = "dataset.txt";
 
     public static void sequentialAlgorithm(String word) {
-        BestMatchingSequential sequential = new BestMatchingSequential();
-
         long start = System.currentTimeMillis();
 
-        Pair pair = sequential.calculate(DICTIONARY, word);
+        Word pair = new BestMatching().start(DICTIONARY, word);
 
         long end = System.currentTimeMillis();
 
-        System.out.println("Palavra com a menor distância: " + pair.getSecond());
+        System.out.println("Palavra com a menor distância: " + pair.getWord());
 
-        System.out.println("Com distância de: " + pair.getFirst());
+        System.out.println("Com distância de: " + pair.getDistance());
 
         System.out.println("Duration: "
                 + ((end - start) / 60000) + "min "
