@@ -1,9 +1,14 @@
 package bestMatch;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BestMatching {
     List<Word> wordsAndDistance = new ArrayList<>();
@@ -32,19 +37,38 @@ public class BestMatching {
         return levenshtein(matrix, str1, str2, str1.length(), str2.length());
     }
 
-    public ArrayList<String> read(String path) {
-        ArrayList<String> data = new ArrayList<>();
+    public ConcurrentLinkedQueue<String> read(String path) {
+        ConcurrentLinkedQueue<String> data = new ConcurrentLinkedQueue<>();
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(path)).getPath()));
+            Path paths = Path.of(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(path)).toURI());
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                data.add(line);
+            long linesCount = Files.lines(paths).count();
+
+            long subSize = linesCount / 8;
+            List<Thread> threads = new ArrayList<>();
+
+            long start = 0;
+            long end = subSize;
+
+            for (int i = 1; i <= 8; i++) {
+                if (i != 8) {
+                    threads.add(new Thread(new Reader(data, Files.lines(paths), start, end)));
+                    threads.get(i - 1).start();
+                    start = subSize;
+                    subSize *= i + 1;
+                } else {
+                    threads.add(new Thread(new Reader(data, Files.lines(paths), start, linesCount)));
+                }
             }
-            reader.close();
 
-        } catch (IOException e) {
+            while (true) {
+                if (threads.get(0).isAlive())
+                    break;
+            }
+
+
+        } catch (IOException | URISyntaxException e) {
             System.err.println("Couldn't read \"" + path + "\" file.");
         }
 
@@ -52,21 +76,29 @@ public class BestMatching {
     }
 
     public Word start(String path, String word) {
-        ArrayList<String> data = read(path);
+        long start = System.currentTimeMillis();
+        ConcurrentLinkedQueue<String> data = read(path);
+        long end = System.currentTimeMillis();
 
-        for (String str : data) {
-            wordsAndDistance.add(new Word(calculate(word, str), str));
-        }
+        System.out.println("Duration: "
+                + ((end - start) / 60000) + "min "
+                + (((end - start) % 60000) / 1000) + "."
+                + (((end - start) % 60000) % 1000) + "s");
 
-        wordsAndDistance.sort((p1, p2) -> {
-            if (p1.getDistance().equals(p2.getDistance()))
-                return p1.getWord().compareTo(p2.getWord());
-            return p1.getDistance() - p2.getDistance();
-        });
-
-        write(word);
-
-        return wordsAndDistance.get(0);
+//        for (String str : data) {
+//            wordsAndDistance.add(new Word(calculate(word, str), str));
+//        }
+//
+//        wordsAndDistance.sort((p1, p2) -> {
+//            if (p1.getDistance().equals(p2.getDistance()))
+//                return p1.getWord().compareTo(p2.getWord());
+//            return p1.getDistance() - p2.getDistance();
+//        });
+//
+//        write(word);
+//
+//        return wordsAndDistance.get(0);
+        return new Word(1, "s");
     }
 
     public void write(String word) {

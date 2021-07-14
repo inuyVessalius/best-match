@@ -1,9 +1,9 @@
 package bestMatch;
 
 public class Main {
-    private static final String DICTIONARY = "small_file.txt";
+    private static final String DICTIONARY = "big_file.txt";
 
-    public static void sequentialAlgorithm(String word) {
+    public static void run(String word) {
         long start = System.currentTimeMillis();
 
         Word pair = new BestMatching().start(DICTIONARY, word);
@@ -22,6 +22,6 @@ public class Main {
 
     public static void main(String[] args) {
         final String word = "test";
-        sequentialAlgorithm(word);
+        run(word);
     }
 }
