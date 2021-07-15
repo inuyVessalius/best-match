@@ -1,7 +1,7 @@
 package bestMatch;
 
 public class Main {
-    private static final String DICTIONARY = "small_file.txt";
+    private static final String DICTIONARY = "big_file.txt";
 
     public static void sequentialAlgorithm(String word) {
         long start = System.currentTimeMillis();
