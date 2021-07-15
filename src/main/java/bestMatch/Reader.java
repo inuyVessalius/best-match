@@ -1,14 +1,14 @@
 package bestMatch;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class Reader implements Runnable {
-    ConcurrentLinkedQueue<String> data;
+    List<String> data;
     Stream<String> stream;
     long start, end;
 
-    public Reader(ConcurrentLinkedQueue<String> data, Stream<String> stream, long start, long end) {
+    public Reader(List<String> data, Stream<String> stream, long start, long end) {
         this.data = data;
         this.stream = stream;
         this.start = start;
@@ -17,5 +17,6 @@ public class Reader implements Runnable {
 
     public void run() {
         stream.skip(start).limit(end).forEach(s -> data.add(s));
+        stream.close();
     }
 }

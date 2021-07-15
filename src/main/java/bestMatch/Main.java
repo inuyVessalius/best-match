@@ -6,13 +6,15 @@ public class Main {
     public static void run(String word) {
         long start = System.currentTimeMillis();
 
-        Word pair = new BestMatching().start(DICTIONARY, word);
+        ThreadManager threadManager = new ThreadManager(DICTIONARY, word);
+
+        Word result = threadManager.start();
 
         long end = System.currentTimeMillis();
 
-        System.out.println("Palavra com a menor distância: " + pair.getWord());
+        System.out.println("Palavra com a menor distância: " + result.getWord());
 
-        System.out.println("Com distância de: " + pair.getDistance());
+        System.out.println("Com distância de: " + result.getDistance());
 
         System.out.println("Duration: "
                 + ((end - start) / 60000) + "min "
