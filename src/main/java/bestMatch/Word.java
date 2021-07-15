@@ -14,14 +14,6 @@ public class Word {
         this.word = other.getWord();
     }
 
-    public void setDistance(Integer distance) {
-        this.distance = distance;
-    }
-
-    public void setWord(String word) {
-        this.word = word;
-    }
-
     public Integer getDistance() {
         return distance;
     }
