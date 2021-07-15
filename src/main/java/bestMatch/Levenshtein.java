@@ -1,18 +1,15 @@
 package bestMatch;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Levenshtein implements Runnable {
     List<String> words;
     String text;
-    List<Word> wordsAndDistance;
     Word closestWord;
 
     public Levenshtein(List<String> words, String text, Word closestWord) {
         this.words = words;
         this.text = text;
-        this.wordsAndDistance = new ArrayList<>();
         this.closestWord = closestWord;
     }
 
@@ -41,16 +38,17 @@ public class Levenshtein implements Runnable {
     }
 
     public void run() {
+        Word auxWord = new Word(Integer.MAX_VALUE, words.get(0));
         for (String word : words) {
-            wordsAndDistance.add(new Word(calculate(word, text), word));
+            Word result = new Word(calculate(word, text), word);
+
+            if (auxWord.getDistance().equals(result.getDistance())) {
+                if (auxWord.getWord().compareTo(result.getWord()) > 0)
+                    auxWord = result;
+            } else if (auxWord.getDistance() > result.getDistance())
+                auxWord = result;
         }
 
-        wordsAndDistance.sort((p1, p2) -> {
-            if (p1.getDistance().equals(p2.getDistance()))
-                return p1.getWord().compareTo(p2.getWord());
-            return p1.getDistance() - p2.getDistance();
-        });
-
-        closestWord.fromWord(wordsAndDistance.get(0));
+        closestWord.fromWord(auxWord);
     }
 }
