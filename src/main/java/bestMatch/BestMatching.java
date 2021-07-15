@@ -1,13 +1,13 @@
 package bestMatch;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
 public class BestMatching {
-    List<Word> wordsAndDistance = new ArrayList<>();
-
     public int levenshtein(int[][] matrix, String str1, String str2, int i, int j) {
         if (Math.min(i, j) == 0)
             return Math.max(i, j);
@@ -32,56 +32,33 @@ public class BestMatching {
         return levenshtein(matrix, str1, str2, str1.length(), str2.length());
     }
 
-    public ArrayList<String> read(String path) {
-        ArrayList<String> data = new ArrayList<>();
+    public List<String> read(String path) {
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(path)).getPath()));
+            Path paths = Path.of(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(path)).toURI());
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                data.add(line);
-            }
-            reader.close();
+            return Files.readAllLines(paths);
 
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             System.err.println("Couldn't read \"" + path + "\" file.");
+            return null;
         }
-
-        return data;
     }
 
-    public Word start(String path, String word) {
-        ArrayList<String> data = read(path);
+    public Word start(String path, String text) {
+        List<String> words = read(path);
 
-        for (String str : data) {
-            wordsAndDistance.add(new Word(calculate(word, str), str));
+        Word auxWord = new Word(Integer.MAX_VALUE, words.get(0));
+        for (String word : words) {
+            Word result = new Word(calculate(word, text), word);
+
+            if (auxWord.getDistance().equals(result.getDistance())) {
+                if (auxWord.getWord().compareTo(result.getWord()) > 0)
+                    auxWord = result;
+            } else if (auxWord.getDistance() > result.getDistance())
+                auxWord = result;
         }
 
-        wordsAndDistance.sort((p1, p2) -> {
-            if (p1.getDistance().equals(p2.getDistance()))
-                return p1.getWord().compareTo(p2.getWord());
-            return p1.getDistance() - p2.getDistance();
-        });
-
-        write(word);
-
-        return wordsAndDistance.get(0);
-    }
-
-    public void write(String word) {
-        try {
-            FileWriter fw = new FileWriter(word + ".csv");
-            fw.write("Words;Similarity to \"" + word + "\"\n");
-
-            for (Word p : wordsAndDistance) {
-                String str = p.getWord() + ";" + p.getDistance().toString() + "\n";
-                fw.write(str);
-            }
-
-            fw.close();
-        } catch (IOException e) {
-            System.err.println("Could not write \"output/" + word + ".csv\".");
-        }
+        return auxWord;
     }
 }
