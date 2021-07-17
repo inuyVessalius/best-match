@@ -1,12 +1,10 @@
 package br.ufrn.bestMatch;
 
 public class Main {
-    private static final String DICTIONARY = "big_file.txt";
-
-    public static void run(String word) {
+    public static void run(String word, String dictionary) {
         long start = System.currentTimeMillis();
 
-        ThreadManager threadManager = new ThreadManager(DICTIONARY, word);
+        ThreadManager threadManager = new ThreadManager(dictionary, word);
 
         Word result = threadManager.start();
 
@@ -23,7 +21,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final String word = "test";
-        run(word);
+        run("test", "big_file.txt");
     }
 }
