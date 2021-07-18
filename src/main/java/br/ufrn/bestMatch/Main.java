@@ -6,7 +6,7 @@ public class Main {
     public static void sequentialAlgorithm(String word) {
         long start = System.currentTimeMillis();
 
-        Word pair = new BestMatching().start(DICTIONARY, word);
+        Word pair = new BestMatching(DICTIONARY, word).start();
 
         long end = System.currentTimeMillis();
 

@@ -1,12 +1,46 @@
 package br.ufrn.bestMatch;
 
+import org.openjdk.jcstress.annotations.Actor;
+import org.openjdk.jcstress.annotations.Expect;
+import org.openjdk.jcstress.annotations.JCStressTest;
+import org.openjdk.jcstress.annotations.Outcome;
+import org.openjdk.jcstress.infra.results.I_Result;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+@JCStressTest
+@Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "less distance should be 0")
+@org.openjdk.jcstress.annotations.State
+@org.openjdk.jmh.annotations.State(Scope.Benchmark)
 public class BestMatching {
+    @Param({"small_file.txt"})
+    private String path;
+    @Param({"test"})
+    String word;
+
+    public BestMatching() {
+    }
+
+    public BestMatching(String path, String word) {
+        this.path = path;
+        this.word = word;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
+
     public int levenshtein(int[][] matrix, String str1, String str2, int i, int j) {
         if (Math.min(i, j) == 0)
             return Math.max(i, j);
@@ -44,12 +78,14 @@ public class BestMatching {
         }
     }
 
-    public Word start(String path, String text) {
+    @org.openjdk.jmh.annotations.Benchmark
+    @Fork(value = 3, warmups = 2)
+    public Word start() {
         List<String> words = read(path);
 
         Word auxWord = new Word(Integer.MAX_VALUE, words.get(0));
-        for (String word : words) {
-            Word result = new Word(calculate(word, text), word);
+        for (String s : words) {
+            Word result = new Word(calculate(s, word), s);
 
             if (auxWord.getDistance().equals(result.getDistance())) {
                 if (auxWord.getWord().compareTo(result.getWord()) > 0)
@@ -59,5 +95,13 @@ public class BestMatching {
         }
 
         return auxWord;
+    }
+
+    @Actor
+    public void getDistanceFromSmallFile(I_Result r) {
+        setPath("small_file.txt");
+        setWord("test");
+
+        r.r1 = start().getDistance();
     }
 }
