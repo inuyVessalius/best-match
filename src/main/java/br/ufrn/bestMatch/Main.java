@@ -1,12 +1,10 @@
 package br.ufrn.bestMatch;
 
 public class Main {
-    private static final String DICTIONARY = "big_file.txt";
-
-    public static void sequentialAlgorithm(String word) {
+    public static void sequentialAlgorithm(String word, String path) {
         long start = System.currentTimeMillis();
 
-        Word pair = new BestMatching(DICTIONARY, word).start();
+        Word pair = new BestMatching(path, word).start();
 
         long end = System.currentTimeMillis();
 
@@ -22,6 +20,6 @@ public class Main {
 
     public static void main(String[] args) {
         final String word = "test";
-        sequentialAlgorithm(word);
+        sequentialAlgorithm(word, "big_file.txt");
     }
 }
