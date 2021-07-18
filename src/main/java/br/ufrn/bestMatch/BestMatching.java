@@ -1,11 +1,10 @@
 package br.ufrn.bestMatch;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 
 public class BestMatching {
     public int levenshtein(int[][] matrix, String str1, String str2, int i, int j) {
@@ -35,11 +34,11 @@ public class BestMatching {
     public List<String> read(String path) {
 
         try {
-            Path paths = Path.of(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(path)).toURI());
+            Path paths = Paths.get(path);
 
             return Files.readAllLines(paths);
 
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             System.err.println("Couldn't read \"" + path + "\" file.");
             return null;
         }
