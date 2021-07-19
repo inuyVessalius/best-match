@@ -21,11 +21,25 @@ import java.util.List;
 @org.openjdk.jcstress.annotations.State
 @org.openjdk.jmh.annotations.State(Scope.Benchmark)
 public class ThreadManager {
-    @Param({ "small_file.txt" })
+    private static volatile ThreadManager instance;
+    @Param({"small_file.txt"})
     private String path;
-    @Param({ "test" })
+    @Param({"test"})
     String word;
     private final static int THREADS_NUMBER = 8;
+
+    public static ThreadManager getInstance(String path, String word) {
+        ThreadManager result = instance;
+        if (result != null) {
+            return result;
+        }
+        synchronized (ThreadManager.class) {
+            if (instance == null) {
+                instance = new ThreadManager(path, word);
+            }
+            return instance;
+        }
+    }
 
     public ThreadManager() {
     }
@@ -48,19 +62,17 @@ public class ThreadManager {
     public Word start() {
         try {
             List<Thread> threads = new ArrayList<>();
-            List<Word> closestWords = new ArrayList<>();
-            Path paths = Paths.get("./", path);
+            Path paths = Paths.get(path);
             long linesCount = Files.lines(paths).count();
             long offset = linesCount / THREADS_NUMBER;
             long start = 0;
             long end = offset;
 
             List<String> lines = Files.readAllLines(paths);
+            Word closestWords = new Word(Integer.MAX_VALUE, lines.get(0));
 
             for (int i = 1; i <= THREADS_NUMBER; i++) {
-                closestWords.add(new Word(0, ""));
-
-                threads.add(new Thread(new Levenshtein(lines.subList((int) start, (int) end - 1), word, closestWords.get(i - 1))));
+                threads.add(new Thread(new Levenshtein(lines.subList((int) start, (int) end - 1), word, closestWords)));
                 threads.get(i - 1).start();
 
                 start = offset * i;
@@ -73,13 +85,7 @@ public class ThreadManager {
             do {
             } while (threads.stream().anyMatch(Thread::isAlive));
 
-            closestWords.sort((p1, p2) -> {
-                if (p1.getDistance().equals(p2.getDistance()))
-                    return p1.getWord().compareTo(p2.getWord());
-                return p1.getDistance() - p2.getDistance();
-            });
-
-            return closestWords.get(0);
+            return closestWords;
         } catch (IOException e) {
             System.err.println("Couldn't read \"" + path + "\" file.");
             return new Word(0, "");

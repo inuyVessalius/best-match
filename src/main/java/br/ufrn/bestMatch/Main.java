@@ -4,9 +4,7 @@ public class Main {
     public static void run(String word, String dictionary) {
         long start = System.currentTimeMillis();
 
-        ThreadManager threadManager = new ThreadManager(dictionary, word);
-
-        Word result = threadManager.start();
+        Word result = ThreadManager.getInstance(dictionary, word).start();
 
         long end = System.currentTimeMillis();
 

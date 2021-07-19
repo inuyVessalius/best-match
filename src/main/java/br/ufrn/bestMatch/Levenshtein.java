@@ -48,7 +48,8 @@ public class Levenshtein implements Runnable {
             } else if (auxWord.getDistance() > result.getDistance())
                 auxWord = result;
         }
-
-        closestWord.fromWord(auxWord);
+        synchronized (this) {
+            closestWord.fromWord(auxWord);
+        }
     }
 }
