@@ -37,19 +37,23 @@ public class Levenshtein implements Runnable {
         return levenshtein(matrix, str1, str2, str1.length(), str2.length());
     }
 
+    public boolean shouldUpdateWord(Word word, Word other) {
+        if (word.getDistance().equals(other.getDistance())) {
+            return word.getWord().compareTo(other.getWord()) > 0;
+        } else return word.getDistance() > other.getDistance();
+    }
+
     public void run() {
         Word auxWord = new Word(Integer.MAX_VALUE, words.get(0));
         for (String word : words) {
             Word result = new Word(calculate(word, text), word);
 
-            if (auxWord.getDistance().equals(result.getDistance())) {
-                if (auxWord.getWord().compareTo(result.getWord()) > 0)
-                    auxWord = result;
-            } else if (auxWord.getDistance() > result.getDistance())
+            if (shouldUpdateWord(auxWord, result))
                 auxWord = result;
         }
         synchronized (this) {
-            closestWord.fromWord(auxWord);
+            if (shouldUpdateWord(closestWord, auxWord))
+                closestWord.fromWord(auxWord);
         }
     }
 }
