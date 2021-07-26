@@ -22,11 +22,12 @@ import java.util.List;
 @org.openjdk.jmh.annotations.State(Scope.Benchmark)
 public class ThreadManager {
     private static volatile ThreadManager instance;
-    @Param({"small_file.txt"})
+    @Param({"big_file.txt"})
     private String path;
-    @Param({"test"})
+    @Param({"gdhnWPTz8EXLidldp0WMXkpcyrKFU6RwVUN9fQWt9kaJ0rhdrYjv4EBoXAfY2bJOyH4trSn7MtNy2QzsMARl0tNY3W12igNKgrWi"})
     String word;
     private final static int THREADS_NUMBER = 8;
+    volatile Word closestWords;
 
     public static ThreadManager getInstance(String path, String word) {
         ThreadManager result = instance;
@@ -69,7 +70,7 @@ public class ThreadManager {
             long end = offset;
 
             List<String> lines = Files.readAllLines(paths);
-            Word closestWords = new Word(Integer.MAX_VALUE, lines.get(0));
+            closestWords = new Word(Integer.MAX_VALUE, lines.get(0));
 
             for (int i = 1; i <= THREADS_NUMBER; i++) {
                 threads.add(new Thread(new Levenshtein(lines.subList((int) start, (int) end - 1), word, closestWords)));
