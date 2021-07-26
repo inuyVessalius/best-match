@@ -33,3 +33,6 @@ hs_err_pid*
 /results/
 /target/
 /best_match.iml
+/flight.jfr
+/jcstress-results-2021-07-25-21-40-34.bin.gz
+/jcstress-results-2021-07-25-21-41-34.bin.gz
