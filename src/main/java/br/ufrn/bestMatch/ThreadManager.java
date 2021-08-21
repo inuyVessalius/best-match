@@ -15,15 +15,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 @JCStressTest
 @Outcome(id = "0", expect = Expect.ACCEPTABLE, desc = "less distance should be 0")
 @org.openjdk.jcstress.annotations.State
 @org.openjdk.jmh.annotations.State(Scope.Benchmark)
 public class ThreadManager {
-    @Param({ "small_file.txt" })
+    @Param({"small_file.txt"})
     private String path;
-    @Param({ "test" })
+    @Param({"test"})
     String word;
     private final static int THREADS_NUMBER = 8;
 
@@ -47,21 +48,18 @@ public class ThreadManager {
     @Fork(value = 3, warmups = 2)
     public Word start() {
         try {
-            List<Thread> threads = new ArrayList<>();
-            List<Word> closestWords = new ArrayList<>();
+            ExecutorService executor = Executors.newFixedThreadPool(THREADS_NUMBER);
             Path paths = Paths.get("./", path);
             long linesCount = Files.lines(paths).count();
             long offset = linesCount / THREADS_NUMBER;
             long start = 0;
             long end = offset;
+            final List<Levenshtein> runners = new ArrayList<>();
 
             List<String> lines = Files.readAllLines(paths);
 
             for (int i = 1; i <= THREADS_NUMBER; i++) {
-                closestWords.add(new Word(0, ""));
-
-                threads.add(new Thread(new Levenshtein(lines.subList((int) start, (int) end - 1), word, closestWords.get(i - 1))));
-                threads.get(i - 1).start();
+                runners.add(new Levenshtein(lines.subList((int) start, (int) end - 1), word));
 
                 start = offset * i;
                 end = offset * (i + 1);
@@ -70,18 +68,32 @@ public class ThreadManager {
                 }
             }
 
-            do {
-            } while (threads.stream().anyMatch(Thread::isAlive));
+            List<Future<Word>> results = executor.invokeAll(runners);
 
-            closestWords.sort((p1, p2) -> {
-                if (p1.getDistance().equals(p2.getDistance()))
-                    return p1.getWord().compareTo(p2.getWord());
-                return p1.getDistance() - p2.getDistance();
-            });
+            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
 
-            return closestWords.get(0);
+                if (executor.shutdownNow().size() == 0)
+                    results.sort((p1, p2) -> {
+                        try {
+                            if (p1.get().getDistance().equals(p2.get().getDistance()))
+                                return p1.get().getWord().compareTo(p2.get().getWord());
+
+                            return p1.get().getDistance() - p2.get().getDistance();
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+
+                        return 0;
+                    });
+
+            }
+
+            return results.get(0).get();
         } catch (IOException e) {
             System.err.println("Couldn't read \"" + path + "\" file.");
+            return new Word(0, "");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
             return new Word(0, "");
         }
     }

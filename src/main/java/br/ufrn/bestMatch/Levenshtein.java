@@ -1,16 +1,15 @@
 package br.ufrn.bestMatch;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
-public class Levenshtein implements Runnable {
+public class Levenshtein implements Callable<Word> {
     List<String> words;
     String text;
-    Word closestWord;
 
-    public Levenshtein(List<String> words, String text, Word closestWord) {
+    public Levenshtein(List<String> words, String text) {
         this.words = words;
         this.text = text;
-        this.closestWord = closestWord;
     }
 
     public int levenshtein(int[][] matrix, String str1, String str2, int i, int j) {
@@ -43,15 +42,16 @@ public class Levenshtein implements Runnable {
         } else return word.getDistance() > other.getDistance();
     }
 
-    public void run() {
-        Word auxWord = new Word(Integer.MAX_VALUE, words.get(0));
+    @Override
+    public Word call() {
+        Word closestWord = new Word(Integer.MAX_VALUE, words.get(0));
         for (String word : words) {
             Word result = new Word(calculate(word, text), word);
 
-            if (shouldUpdateWord(auxWord, result))
-                auxWord = result;
+            if (shouldUpdateWord(closestWord, result))
+                closestWord = result;
         }
 
-        closestWord.fromWord(auxWord);
+        return closestWord;
     }
 }
