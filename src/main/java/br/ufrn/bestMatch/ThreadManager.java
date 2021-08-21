@@ -48,52 +48,14 @@ public class ThreadManager {
     @Fork(value = 3, warmups = 2)
     public Word start() {
         try {
-            ExecutorService executor = Executors.newFixedThreadPool(THREADS_NUMBER);
+            ForkJoinPool pool = ForkJoinPool.commonPool();
             Path paths = Paths.get("./", path);
-            long linesCount = Files.lines(paths).count();
-            long offset = linesCount / THREADS_NUMBER;
-            long start = 0;
-            long end = offset;
-            final List<Levenshtein> runners = new ArrayList<>();
 
             List<String> lines = Files.readAllLines(paths);
 
-            for (int i = 1; i <= THREADS_NUMBER; i++) {
-                runners.add(new Levenshtein(lines.subList((int) start, (int) end - 1), word));
-
-                start = offset * i;
-                end = offset * (i + 1);
-                if (i == THREADS_NUMBER - 1) {
-                    end = linesCount;
-                }
-            }
-
-            List<Future<Word>> results = executor.invokeAll(runners);
-
-            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-
-                if (executor.shutdownNow().size() == 0)
-                    results.sort((p1, p2) -> {
-                        try {
-                            if (p1.get().getDistance().equals(p2.get().getDistance()))
-                                return p1.get().getWord().compareTo(p2.get().getWord());
-
-                            return p1.get().getDistance() - p2.get().getDistance();
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                        }
-
-                        return 0;
-                    });
-
-            }
-
-            return results.get(0).get();
+            return pool.invoke(new Levenshtein(lines, word));
         } catch (IOException e) {
             System.err.println("Couldn't read \"" + path + "\" file.");
-            return new Word(0, "");
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
             return new Word(0, "");
         }
     }

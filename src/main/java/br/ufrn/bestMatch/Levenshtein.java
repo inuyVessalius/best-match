@@ -1,15 +1,19 @@
 package br.ufrn.bestMatch;
 
-import java.util.List;
-import java.util.concurrent.Callable;
 
-public class Levenshtein implements Callable<Word> {
+import java.util.List;
+import java.util.concurrent.RecursiveTask;
+
+public class Levenshtein extends RecursiveTask<Word> {
+    static final int THRESHOLD = 1000;
+    Word closestWord;
     List<String> words;
     String text;
 
     public Levenshtein(List<String> words, String text) {
         this.words = words;
         this.text = text;
+        this.closestWord = new Word(Integer.MAX_VALUE, "");
     }
 
     public int levenshtein(int[][] matrix, String str1, String str2, int i, int j) {
@@ -42,16 +46,31 @@ public class Levenshtein implements Callable<Word> {
         } else return word.getDistance() > other.getDistance();
     }
 
+
     @Override
-    public Word call() {
-        Word closestWord = new Word(Integer.MAX_VALUE, words.get(0));
-        for (String word : words) {
-            Word result = new Word(calculate(word, text), word);
+    protected Word compute() {
+        Word auxWord = new Word(Integer.MAX_VALUE, words.get(0));
+        if (words.size() <= THRESHOLD) {
+            for (String word : words) {
+                Word result = new Word(calculate(word, text), word);
 
-            if (shouldUpdateWord(closestWord, result))
-                closestWord = result;
+                if (shouldUpdateWord(auxWord, result))
+                    auxWord = result;
+
+            }
+            closestWord = auxWord;
+        } else {
+            Levenshtein left = new Levenshtein(words.subList(0, words.size() / 2), text);
+            Levenshtein right = new Levenshtein(words.subList(words.size() / 2, words.size()), text);
+            invokeAll(left, right);
+
+            if (shouldUpdateWord(closestWord, left.closestWord))
+                closestWord = left.closestWord;
+
+            if (shouldUpdateWord(closestWord, right.closestWord))
+                closestWord = right.closestWord;
+
         }
-
         return closestWord;
     }
 }
