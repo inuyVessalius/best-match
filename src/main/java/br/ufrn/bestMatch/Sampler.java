@@ -15,8 +15,8 @@ public class Sampler extends AbstractJavaSamplerClient implements Serializable {
         SampleResult result = new SampleResult();
         result.sampleStart();
         result.setSampleLabel("Test Sample");
-        BestMatching bestMatching = new BestMatching(var1, var2);
-        if (bestMatching.start().getDistance() == 0) {
+        ThreadManager threadManager = new ThreadManager(var1, var2);
+        if (threadManager.start().getDistance() == 0) {
             result.sampleEnd();
             result.setResponseCode("200");
             result.setResponseMessage("OK");

@@ -1,16 +1,18 @@
 package br.ufrn.bestMatch;
 
 public class Main {
-    public static void sequentialAlgorithm(String word, String path) {
+    public static void run(String word, String dictionary) {
         long start = System.currentTimeMillis();
 
-        Word pair = new BestMatching(path, word).start();
+        ThreadManager threadManager = new ThreadManager(dictionary, word);
+
+        Word result = threadManager.start();
 
         long end = System.currentTimeMillis();
 
-        System.out.println("Palavra com a menor distância: " + pair.getWord());
+        System.out.println("Palavra com a menor distância: " + result.getWord());
 
-        System.out.println("Com distância de: " + pair.getDistance());
+        System.out.println("Com distância de: " + result.getDistance());
 
         System.out.println("Duration: "
                 + ((end - start) / 60000) + "min "
@@ -19,7 +21,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final String word = "test";
-        sequentialAlgorithm(word, "big_file.txt");
+        run("test", "big_file.txt");
     }
 }
