@@ -1,6 +1,6 @@
 package br.ufrn.bestMatch;
 
-public class Main {
+public class    Main {
     public static void run(String word, String dictionary) {
         long start = System.currentTimeMillis();
 
