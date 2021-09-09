@@ -30,6 +30,6 @@ public class Main implements Serializable {
     }
 
     public static void main(String[] args) {
-        run("test", "big_file.txt");
+        run("test", "./big_file.txt");
     }
 }

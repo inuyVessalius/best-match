@@ -56,6 +56,12 @@ THE POSSIBILITY OF SUCH DAMAGE.
             <version>3.1.2</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase</artifactId>
+            <version>2.4.5</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.10.0</version>
@@ -98,7 +104,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
         <!--
             Java source/target to use for compilation.
           -->
-        <javac.target>1.8</javac.target>
+        <javac.target>8</javac.target>
 
         <!--
             Name of the test Uber-JAR to generate.

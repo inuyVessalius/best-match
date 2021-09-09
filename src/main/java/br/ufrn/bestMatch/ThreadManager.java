@@ -57,7 +57,8 @@ public class ThreadManager implements Serializable {
     @org.openjdk.jmh.annotations.Benchmark
     @Fork(value = 3, warmups = 2)
     public Word start() {
-        JavaRDD<String> lines = sc.textFile("./" + path);
+        Logger.getLogger("org").setLevel(Level.ERROR);
+        JavaRDD<String> lines = sc.textFile(path);
         JavaRDD<Word> words = lines.map(line -> new Levenshtein(line, word).compute());
 
 
