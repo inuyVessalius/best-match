@@ -1,7 +1,9 @@
 package br.ufrn.bestMatch;
 
 
-public class Levenshtein {
+import java.io.Serializable;
+
+public class Levenshtein implements Serializable {
     String word;
     String text;
 

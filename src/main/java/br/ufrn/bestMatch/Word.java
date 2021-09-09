@@ -1,6 +1,8 @@
 package br.ufrn.bestMatch;
 
-public class Word {
+import java.io.Serializable;
+
+public class Word implements Serializable {
     private Integer distance;
     private String word;
 
