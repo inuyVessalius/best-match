@@ -4,6 +4,10 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.Serializable;
 
@@ -12,10 +16,12 @@ public class Sampler extends AbstractJavaSamplerClient implements Serializable {
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
         String var1 = javaSamplerContext.getParameter("path");
         String var2 = javaSamplerContext.getParameter("text");
+        Logger.getLogger("org").setLevel(Level.ERROR);
+        SparkConf conf = new SparkConf().setAppName("BestMatch").setMaster("local[*]");
         SampleResult result = new SampleResult();
         result.sampleStart();
         result.setSampleLabel("Test Sample");
-        ThreadManager threadManager = new ThreadManager(var1, var2);
+        ThreadManager threadManager = new ThreadManager(var1, var2, new JavaSparkContext(conf));
         if (threadManager.start().getDistance() == 0) {
             result.sampleEnd();
             result.setResponseCode("200");

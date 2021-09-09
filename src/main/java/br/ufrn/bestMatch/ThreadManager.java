@@ -10,9 +10,7 @@ import org.openjdk.jcstress.annotations.Expect;
 import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.infra.results.I_Result;
-import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Param;
-import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.*;
 
 import java.io.Serializable;
 
@@ -26,6 +24,18 @@ public class ThreadManager implements Serializable {
     private String path;
     @Param({"test"})
     String word;
+    private static JavaSparkContext sc;
+
+    @Setup
+    public void setup() {
+        SparkConf conf = new SparkConf().setAppName("BestMatch").setMaster("local[*]");
+        sc = new JavaSparkContext(conf);
+    }
+
+    @TearDown
+    public void tearDown() {
+        sc.close();
+    }
 
     public ThreadManager() {
     }
@@ -38,17 +48,15 @@ public class ThreadManager implements Serializable {
         this.word = word;
     }
 
-    public ThreadManager(String path, String word) {
+    public ThreadManager(String path, String word, JavaSparkContext context) {
         this.path = path;
         this.word = word;
+        sc = context;
     }
 
     @org.openjdk.jmh.annotations.Benchmark
     @Fork(value = 3, warmups = 2)
     public Word start() {
-        Logger.getLogger("org").setLevel(Level.ERROR);
-        SparkConf conf = new SparkConf().setAppName("wordCounts").setMaster("local[*]");
-        JavaSparkContext sc = new JavaSparkContext(conf);
         JavaRDD<String> lines = sc.textFile("./" + path);
         JavaRDD<Word> words = lines.map(line -> new Levenshtein(line, word).compute());
 

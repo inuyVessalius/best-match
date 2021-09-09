@@ -1,10 +1,19 @@
 package br.ufrn.bestMatch;
 
-public class    Main {
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+
+import java.io.Serializable;
+
+public class Main implements Serializable {
     public static void run(String word, String dictionary) {
         long start = System.currentTimeMillis();
 
-        ThreadManager threadManager = new ThreadManager(dictionary, word);
+        Logger.getLogger("org").setLevel(Level.ERROR);
+        SparkConf conf = new SparkConf().setAppName("BestMatch").setMaster("local[*]");
+        ThreadManager threadManager = new ThreadManager(dictionary, word, new JavaSparkContext(conf));
 
         Word result = threadManager.start();
 
